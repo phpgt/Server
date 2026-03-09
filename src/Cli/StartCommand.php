@@ -58,17 +58,14 @@ class StartCommand extends Command {
 		do {
 			$output = $process->getOutput();
 			$error = $process->getErrorOutput();
-
-			if(preg_match(self::IGNORE_REGEX, $error)) {
-				$error = "";
-			}
+			$error = $this->filterErrorOutput($error);
 
 			if(!empty($output)) {
 				$this->write($output);
 			}
 
 			if(!empty($error)) {
-				$this->write($error);
+				$this->write($error, Stream::ERROR);
 			}
 
 			usleep(250000); // 1/4 second
@@ -144,5 +141,35 @@ class StartCommand extends Command {
 
 		array_push($cmd, "-S", "$bind:$port", "-t", $docRoot, $goPath);
 		return $cmd;
+	}
+
+	private function filterErrorOutput(string $errorOutput):string {
+		if($errorOutput === "") {
+			return "";
+		}
+
+		$lineArray = preg_split("/\\R/", $errorOutput);
+		if($lineArray === false) {
+			return $errorOutput;
+		}
+
+		$filteredLineArray = [];
+		foreach($lineArray as $line) {
+			if($line === "") {
+				continue;
+			}
+
+			if(preg_match(self::IGNORE_REGEX, $line)) {
+				continue;
+			}
+
+			$filteredLineArray[] = $line;
+		}
+
+		if(empty($filteredLineArray)) {
+			return "";
+		}
+
+		return implode(PHP_EOL, $filteredLineArray) . PHP_EOL;
 	}
 }
