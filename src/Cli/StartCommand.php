@@ -14,6 +14,8 @@ class StartCommand extends Command {
 	const IGNORE_REGEX = "/(127\.0\.0\.1|localhost|\[[\d:]+\])"
 		.":\d+ (Accepted|Closing)/";
 	const DEFAULT_THREADS = 8;
+	private bool $logStaticRequests = true;
+	private bool $log404ToErrorLog = true;
 
 	// phpcs:disable Generic.Metrics.CyclomaticComplexity
 	public function run(?ArgumentValueList $arguments = null):void {
@@ -30,6 +32,7 @@ class StartCommand extends Command {
 			);
 			return;
 		}
+		$this->loadLoggerOutputConfig();
 
 		$defaultThreads = self::DEFAULT_THREADS;
 		$bind = $arguments?->get("bind") ?? self::DEFAULT_BIND_HOST;
@@ -163,6 +166,18 @@ class StartCommand extends Command {
 				continue;
 			}
 
+			$requestLogDetails = $this->extractRequestLogDetails($line);
+			if($requestLogDetails) {
+				[$statusCode, $path] = $requestLogDetails;
+				if(!$this->log404ToErrorLog && $statusCode === 404) {
+					continue;
+				}
+
+				if(!$this->logStaticRequests && $this->isStaticPath($path)) {
+					continue;
+				}
+			}
+
 			$filteredLineArray[] = $line;
 		}
 
@@ -171,5 +186,94 @@ class StartCommand extends Command {
 		}
 
 		return implode(PHP_EOL, $filteredLineArray) . PHP_EOL;
+	}
+
+	private function loadLoggerOutputConfig():void {
+		$rootPath = getcwd() ?: ".";
+		$defaultConfigPath = $rootPath . DIRECTORY_SEPARATOR . "vendor"
+			. DIRECTORY_SEPARATOR . "phpgt"
+			. DIRECTORY_SEPARATOR . "webengine"
+			. DIRECTORY_SEPARATOR . "config.default.ini";
+		$projectConfigPath = $rootPath . DIRECTORY_SEPARATOR . "config.ini";
+
+		$defaultConfig = [];
+		if(file_exists($defaultConfigPath)) {
+			$defaultConfig = parse_ini_file(
+				$defaultConfigPath,
+				true,
+				INI_SCANNER_TYPED
+			) ?: [];
+		}
+
+		$projectConfig = [];
+		if(file_exists($projectConfigPath)) {
+			$projectConfig = parse_ini_file(
+				$projectConfigPath,
+				true,
+				INI_SCANNER_TYPED
+			) ?: [];
+		}
+
+		$this->logStaticRequests = $this->readLoggerBoolean(
+			$projectConfig,
+			$defaultConfig,
+			"log_static_requests",
+			true,
+		);
+		$this->log404ToErrorLog = $this->readLoggerBoolean(
+			$projectConfig,
+			$defaultConfig,
+			"log_404_to_error_log",
+			true,
+		);
+	}
+
+	/**
+	 * @param array<string, mixed> $projectConfig
+	 * @param array<string, mixed> $defaultConfig
+	 */
+	private function readLoggerBoolean(
+		array $projectConfig,
+		array $defaultConfig,
+		string $key,
+		bool $fallback,
+	):bool {
+		$projectLogger = $projectConfig["logger"] ?? [];
+		if(is_array($projectLogger) && array_key_exists($key, $projectLogger)) {
+			return (bool)$projectLogger[$key];
+		}
+
+		$defaultLogger = $defaultConfig["logger"] ?? [];
+		if(is_array($defaultLogger) && array_key_exists($key, $defaultLogger)) {
+			return (bool)$defaultLogger[$key];
+		}
+
+		return $fallback;
+	}
+
+	/** @return null|array{int, string} */
+	private function extractRequestLogDetails(string $line):?array {
+		$matched = preg_match(
+			'/\[(\d{3})\]:\s+[A-Z]+\s+(\S+)/',
+			$line,
+			$matches
+		);
+		if(!$matched) {
+			return null;
+		}
+
+		$statusCode = (int)$matches[1];
+		$path = $matches[2];
+		return [$statusCode, $path];
+	}
+
+	private function isStaticPath(string $path):bool {
+		$parsedPath = parse_url($path, PHP_URL_PATH);
+		if(!is_string($parsedPath) || $parsedPath === "") {
+			return false;
+		}
+
+		$basename = basename($parsedPath);
+		return str_contains($basename, ".");
 	}
 }
