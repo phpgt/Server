@@ -58,6 +58,12 @@ class StartCommand extends Command {
 		$process->setEnv("PHP_CLI_SERVER_WORKERS", (string)$threads);
 		$process->exec();
 
+		$time = microtime(true);
+		do {
+			$dt = microtime(true) - $time;
+		}
+		while($process->isRunning() && $dt < 0.5);
+
 		do {
 			$output = $process->getOutput();
 			$error = $process->getErrorOutput();
@@ -74,8 +80,6 @@ class StartCommand extends Command {
 			usleep(250000); // 1/4 second
 		}
 		while($process->isRunning());
-
-		$this->writeLine("Server process ended.");
 	}
 
 	public function getName():string {
