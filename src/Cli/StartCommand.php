@@ -152,6 +152,10 @@ class StartCommand extends Command {
 		return $cmd;
 	}
 
+	/**
+	 * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+	 * @SuppressWarnings("PHPMD.NPathComplexity")
+	 */
 	private function filterErrorOutput(string $errorOutput):string {
 		if($errorOutput === "") {
 			return "";
