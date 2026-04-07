@@ -33,7 +33,7 @@
 
 	<rule ref="rulesets/naming.xml/ShortVariable">
 		<properties>
-			<property name="exceptions" value="a,b,i" />
+			<property name="exceptions" value="a,b,i,dt" />
 		</properties>
 	</rule>
 	<rule ref="rulesets/naming.xml/ShortMethodName">
