@@ -18,7 +18,7 @@ class StartCommand extends Command {
 	private bool $log404ToErrorLog = true;
 
 	// phpcs:disable Generic.Metrics.CyclomaticComplexity
-	public function run(?ArgumentValueList $arguments = null):void {
+	public function run(?ArgumentValueList $arguments = null):int {
 		$goPath = implode(DIRECTORY_SEPARATOR, [
 			"vendor",
 			"phpgt",
@@ -30,7 +30,7 @@ class StartCommand extends Command {
 				"Error: Current directory is not a WebEngine project",
 				Stream::ERROR
 			);
-			return;
+			return 1;
 		}
 		$this->loadLoggerOutputConfig();
 
@@ -80,6 +80,8 @@ class StartCommand extends Command {
 			usleep(250000); // 1/4 second
 		}
 		while($process->isRunning());
+
+		return 2;
 	}
 
 	public function getName():string {
