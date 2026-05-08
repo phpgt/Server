@@ -2,7 +2,7 @@
 <?php
 use Gt\Cli\Application;
 use Gt\Cli\Argument\CommandArgumentList;
-use Gt\Server\Cli\StartCommand;
+use GT\Server\Cli\StartCommand;
 
 foreach([__DIR__ . "/../../../autoload.php",__DIR__ . "/../vendor/autoload.php"] as $location) {
 	if(file_exists($location)) {
