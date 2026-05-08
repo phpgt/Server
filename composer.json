@@ -18,14 +18,26 @@
 
 	"autoload": {
 		"psr-4": {
+			"GT\\Server\\": "./src/",
 			"Gt\\Server\\": "./src/"
 		}
+	},
+
+	"scripts": {
+		"phpstan": "vendor/bin/phpstan analyse --level 6 src --memory-limit 256M",
+		"phpcs": "vendor/bin/phpcs src --standard=phpcs.xml",
+		"phpmd": "vendor/bin/phpmd src/ text phpmd.xml",
+		"test": [
+			"@phpstan",
+			"@phpcs",
+			"@phpmd"
+		]
 	},
 
 	"funding": [
 		{
 			"type": "github",
-			"url": "https://github.com/sponsors/PhpGt"
+			"url": "https://github.com/sponsors/phpgt"
 		}
 	]
 }

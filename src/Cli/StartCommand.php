@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Server\Cli;
+namespace GT\Server\Cli;
 
 use Gt\Cli\Argument\ArgumentValueList;
 use Gt\Cli\Command\Command;
