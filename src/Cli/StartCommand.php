@@ -1,12 +1,12 @@
 <?php
 namespace GT\Server\Cli;
 
-use Gt\Cli\Argument\ArgumentValueList;
-use Gt\Cli\Command\Command;
-use Gt\Cli\Parameter\NamedParameter;
-use Gt\Cli\Parameter\Parameter;
-use Gt\Cli\Stream;
-use Gt\Daemon\Process;
+use GT\Cli\Argument\ArgumentValueList;
+use GT\Cli\Command\Command;
+use GT\Cli\Parameter\NamedParameter;
+use GT\Cli\Parameter\Parameter;
+use GT\Cli\StreamName;
+use GT\Daemon\Process;
 
 class StartCommand extends Command {
 	const DEFAULT_BIND_HOST = "0.0.0.0";
@@ -28,7 +28,7 @@ class StartCommand extends Command {
 		if(!file_exists($goPath)) {
 			$this->writeLine(
 				"Error: Current directory is not a WebEngine project",
-				Stream::ERROR
+				StreamName::ERROR
 			);
 			return 1;
 		}
@@ -74,7 +74,7 @@ class StartCommand extends Command {
 			}
 
 			if(!empty($error)) {
-				$this->write($error, Stream::ERROR);
+				$this->write($error, StreamName::ERROR);
 			}
 
 			usleep(250000); // 1/4 second
