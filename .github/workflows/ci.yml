@@ -16,10 +16,10 @@ jobs:
         php: [ 8.2, 8.3, 8.4, 8.5 ]
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: /tmp/composer-cache
           key: ${{ runner.os }}-${{ matrix.php }}-${{ hashFiles('**/composer.lock') }}
@@ -34,7 +34,7 @@ jobs:
         run: mkdir /tmp/github-actions/ && tar --exclude=".git" -cvf /tmp/github-actions/build.tar ./
 
       - name: Upload build archive for test runners
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-artifact-${{ matrix.php }}
           path: /tmp/github-actions
@@ -48,7 +48,7 @@ jobs:
         php: [ 8.2, 8.3, 8.4, 8.5 ]
 
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: build-artifact-${{ matrix.php }}
           path: /tmp/github-actions
@@ -72,7 +72,7 @@ jobs:
         php: [ 8.2, 8.3, 8.4, 8.5 ]
 
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: build-artifact-${{ matrix.php }}
           path: /tmp/github-actions
@@ -95,7 +95,7 @@ jobs:
         php: [ 8.2, 8.3, 8.4, 8.5 ]
 
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: build-artifact-${{ matrix.php }}
           path: /tmp/github-actions
